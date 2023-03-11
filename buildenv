@@ -3,7 +3,7 @@
 #
 export ZOPEN_TYPE='TARBALL'
 export ZOPEN_TARBALL_URL='http://git.savannah.gnu.org/cgit/emacs.git/snapshot/emacs-emacs-28.3-rc1.tar.gz'
-export ZOPEN_TARBALL_DEPS='m4 autoconf automake texinfo zoslib ncurses'
+export ZOPEN_TARBALL_DEPS='m4 autoconf automake texinfo ncurses gawk zoslib'
 export ZOPEN_RUNTIME_DEPS=""
 
 export ZOPEN_BOOTSTRAP="./autogen.sh"

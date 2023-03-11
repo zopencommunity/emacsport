@@ -1,0 +1,33 @@
+diff --git a/lib/filemode.c b/lib/filemode.c
+index cb508ad..a8e8268 100644
+--- a/lib/filemode.c
++++ b/lib/filemode.c
+@@ -79,6 +79,28 @@ ftypelet (mode_t bits)
+   return '?';
+ }
+ 
++#ifdef __MVS__
++  /* z/OS incorrectly defined these macros - if they are present,
++   * redefined them
++   */
++  #ifdef S_TYPEISSEM
++     #undef S_TYPEISSEM
++     #define S_TYPEISSEM(x) (0)
++  #endif
++  #ifdef S_TYPEISMQ
++     #undef S_TYPEISMQ
++     #define S_TYPEISMQ(x) (0)
++  #endif
++  #ifdef S_TYPEISSHM
++     #undef S_TYPEISSHM
++     #define S_TYPEISSHM(x) (0)
++  #endif
++  #ifdef S_TYPEISTMO
++     #undef S_TYPEISTMO
++     #define S_TYPEISTMO(x) (0)
++  #endif
++#endif
++
+ /* Like filemodestring, but rely only on MODE.  */
+ 
+ void
