@@ -1,0 +1,15 @@
+#
+# Build emacs using latest tarball
+#
+export ZOPEN_TYPE='TARBALL'
+export ZOPEN_TARBALL_URL='http://git.savannah.gnu.org/cgit/emacs.git/snapshot/emacs-emacs-28.3-rc1.tar.gz'
+export ZOPEN_TARBALL_DEPS='perl make m4 autoconf automake texinfo ncurses gawk zoslib'
+export ZOPEN_RUNTIME_DEPS=""
+
+export ZOPEN_BOOTSTRAP="./autogen.sh"
+export ZOPEN_CONFIGURE_OPTS='--with-xpm=ifavailable --with-jpeg=ifavailable --with-png=ifavailable --with-gif=ifavailable --with-tiff=ifavailable --with-gnutls=ifavailable --without-x'
+
+zopen_check_results()
+{
+  return 3
+}
