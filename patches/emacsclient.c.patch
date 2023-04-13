@@ -1,0 +1,18 @@
+diff --git a/lib-src/emacsclient.c b/lib-src/emacsclient.c
+index 57a5eff..f92ed1a 100644
+--- a/lib-src/emacsclient.c
++++ b/lib-src/emacsclient.c
+@@ -1412,8 +1412,13 @@ local_sockname (int s, char sockname[socknamesize], int tmpdirlen,
+   char *emacsdirend = sockname + tmpdirlen + suffixlen -
+     strlen(server_name) - 1;
+   *emacsdirend = '\0';
++/*FIXME: Investigate adding openat */
++#ifdef __MVS__
++  int dir = 0;
++#else
+   int dir = openat (AT_FDCWD, sockname,
+ 		    O_PATH | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC);
++#endif
+   *emacsdirend = '/';
+   if (dir < 0)
+     return errno;

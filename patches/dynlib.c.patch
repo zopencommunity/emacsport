@@ -1,0 +1,21 @@
+diff --git a/src/dynlib.c b/src/dynlib.c
+index 751396b..7b29b53 100644
+--- a/src/dynlib.c
++++ b/src/dynlib.c
+@@ -284,6 +284,8 @@ dynlib_addr (void (*funcptr) (void), const char **path, const char **sym)
+ {
+   *path = NULL;
+   *sym = NULL;
++/*FIXME: investigate if we have an altnerative to DL_info */
++#ifndef __MVS__
+ #ifdef HAVE_DLADDR
+   void *ptr = (void *) funcptr;
+   Dl_info info;
+@@ -293,6 +295,7 @@ dynlib_addr (void (*funcptr) (void), const char **path, const char **sym)
+       *sym = info.dli_sname;
+     }
+ #endif
++#endif
+ }
+ 
+ const char *

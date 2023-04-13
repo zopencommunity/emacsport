@@ -1,0 +1,16 @@
+diff --git a/src/emacs-module.c b/src/emacs-module.c
+index 392b3ba..637b4f7 100644
+--- a/src/emacs-module.c
++++ b/src/emacs-module.c
+@@ -248,8 +248,11 @@ module_decode_utf_8 (const char *str, ptrdiff_t len)
+    passing information to the handler functions.  */
+ 
+ #if !HAS_ATTRIBUTE (cleanup)
++/*FIXME: investigate */
++#ifndef __MVS__
+  #error "__attribute__ ((cleanup)) not supported by this compiler; try GCC"
+ #endif
++#endif
+ 
+ /* Place this macro at the beginning of a function returning a number
+    or a pointer to handle non-local exits.  The function must have an

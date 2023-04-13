@@ -1,0 +1,26 @@
+diff --git a/src/process.c b/src/process.c
+index 8b587aa..87b72e9 100644
+--- a/src/process.c
++++ b/src/process.c
+@@ -30,6 +30,10 @@ along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.  */
+ #include <unistd.h>
+ #include <fcntl.h>
+ 
++#ifdef __MVS__
++#undef HAVE_GETIFADDRS
++#endif 
++
+ #include "lisp.h"
+ 
+ /* Only MS-DOS does not define `subprocesses'.  */
+@@ -841,6 +845,10 @@ allocate_pty (char pty_name[PTY_NAME_SIZE])
+   PTY_ITERATION
+ #else
+   register int c, i;
++/*FIXME: bypass, need to fix in configure */
++#ifdef __MVS__
++#define FIRST_PTY_LETTER 'p'
++#endif
+   for (c = FIRST_PTY_LETTER; c <= 'z'; c++)
+     for (i = 0; i < 16; i++)
+ #endif
