@@ -1,0 +1,15 @@
+diff --git a/src/Makefile.in b/src/Makefile.in
+index 29e1513..1a73e6b 100644
+--- a/src/Makefile.in
++++ b/src/Makefile.in
+@@ -602,6 +602,10 @@ $(etc)/DOC: lisp.mk $(libsrc)/make-docfile$(EXEEXT) $(obj) $(lisp)
+ 	$(AM_V_at)rm -f $(etc)/DOC
+ 	$(AM_V_at)$(libsrc)/make-docfile -d $(srcdir) \
+ 	  $(SOME_MACHINE_OBJECTS) $(obj) > $(etc)/DOC
++	
++	# Same fopen_ASCII error, somethings missing, please check
++	CFLAGS += -DNO_FOPEN_ASCII
++
+ 	$(AM_V_at)$(libsrc)/make-docfile -a $(etc)/DOC -d $(lispsource) \
+ 	  $(shortlisp)
+ 

@@ -1,0 +1,34 @@
+diff --git a/lib-src/Makefile.in b/lib-src/Makefile.in
+index 92487ed..4e91443 100644
+--- a/lib-src/Makefile.in
++++ b/lib-src/Makefile.in
+@@ -1,4 +1,5 @@
+-### @configure_input@
++#
++# @configure_input@
+ 
+ # Copyright (C) 1985, 1987-1988, 1993-1994, 2001-2022 Free Software
+ # Foundation, Inc.
+@@ -392,6 +393,11 @@ ebrowse${EXEEXT}: ${srcdir}/ebrowse.c ${srcdir}/../lib/min-max.h $(NTLIB) \
+ make-docfile${EXEEXT}: ${srcdir}/make-docfile.c $(NTLIB) $(config_h)
+ 	$(AM_V_CCLD)$(CC) ${ALL_CFLAGS} $< $(NTLIB) $(LOADLIBES) -o $@
+ 
++# fopen_ascii strikes again not being existant. please look into this
++
++CFLAGS += -DNO_FOPEN_ASCII
++
++
+ make-fingerprint${EXEEXT}: ${srcdir}/make-fingerprint.c $(NTLIB) $(config_h)
+ 	$(AM_V_CCLD)$(CC) ${ALL_CFLAGS} $< $(NTLIB) $(LOADLIBES) -o $@
+ 
+@@ -422,6 +428,10 @@ NTDEPS = $(NTINC)/ms-w32.h $(NTINC)/sys/stat.h $(NTINC)/inttypes.h \
+ ntlib.o: ${srcdir}/ntlib.c ${srcdir}/ntlib.h $(NTDEPS)
+ 	$(AM_V_CC)$(CC) -c ${CPP_CFLAGS} $<
+ 
++# fopen_ascii missing?, please look into this
++CFLAGS += -DNO_FOPEN_ASCII
++LOADLIBES += -lc
++
+ hexl${EXEEXT}: ${srcdir}/hexl.c $(NTLIB) $(config_h)
+ 	$(AM_V_CCLD)$(CC) ${ALL_CFLAGS} $< $(LOADLIBES) -o $@
+ 
