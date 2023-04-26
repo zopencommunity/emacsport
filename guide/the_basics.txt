@@ -1,0 +1,17 @@
+Hello and Welcome to Barra_wild, in this is a testing branch for emacsport in a attempt to get it up and running.
+
+If your not familiar with github you can follow this quick steps inorder to get a push to the emacsport repository.
+
+1. Go to the branch you wish to do your changes to with git checkout -b my_branch
+
+2. then add your changed file with: git add file/location
+
+Generally the file location will likely just be in your patches folder.
+You can also eaisly see which files are changed with git status.
+
+3. Create your commit with: git commit -m "comment about said commit"
+
+4. Push it up to github: git push branch_name
+
+If that does not work then you can try adding --set-upsteram origin after the word "push"
+
