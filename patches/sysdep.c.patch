@@ -1,0 +1,32 @@
+diff --git a/src/sysdep.c b/src/sysdep.c
+index 72be25f..51b5337 100644
+--- a/src/sysdep.c
++++ b/src/sysdep.c
+@@ -2317,8 +2317,14 @@ emacs_openat (int dirfd, char const *file, int oflags, int mode)
+   if (! (oflags & O_TEXT))
+     oflags |= O_BINARY;
+   oflags |= O_CLOEXEC;
++//FIXME:
++#ifndef __MVS__
+   while ((fd = openat (dirfd, file, oflags, mode)) < 0 && errno == EINTR)
+     maybe_quit ();
++#else
++  while ((fd = open (file, oflags, mode)) < 0 && errno == EINTR)
++    maybe_quit ();
++#endif
+   return fd;
+ }
+ 
+@@ -2338,9 +2344,12 @@ emacs_openat_noquit (int dirfd, const char *file, int oflags,
+   if (! (oflags & O_TEXT))
+     oflags |= O_BINARY;
+   oflags |= O_CLOEXEC;
++//FIXME:
++#ifndef __MVS__
+   do
+     fd = openat (dirfd, file, oflags, mode);
+   while (fd < 0 && errno == EINTR);
++#endif
+   return fd;
+ }
+ 

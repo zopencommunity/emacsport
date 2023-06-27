@@ -1,8 +1,8 @@
 diff --git a/src/editfns.c b/src/editfns.c
-index 203d3a4..e32cb4e 100644
+index 203d3a4..276e0c1 100644
 --- a/src/editfns.c
 +++ b/src/editfns.c
-@@ -1266,11 +1266,15 @@ is in general a comma-separated list.  */)
+@@ -1266,11 +1266,18 @@ is in general a comma-separated list.  */)
    if (!pw)
      return Qnil;
  
@@ -14,6 +14,9 @@ index 203d3a4..e32cb4e 100644
       comma-separated list. */
    q = strchr (p, ',');
    full = make_string (p, q ? q - p : strlen (p));
++#else
++  p = "N/A";
++  full = "N/A";
 +#endif
  
  #ifdef AMPERSAND_FULL_NAME
