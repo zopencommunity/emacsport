@@ -1,5 +1,5 @@
 # bump: emacs-version /EMACS_VERSION="(.*)"/ https://git.savannah.gnu.org/git/emacs.git|semver:*
-EMACS_VERSION="29.1.90"
+EMACS_VERSION="29.2"
 export ZOPEN_BUILD_LINE='STABLE'
 export ZOPEN_STABLE_URL='http://git.savannah.gnu.org/cgit/emacs.git/snapshot/emacs-${EMACS_VERSION}.tar.gz'
 export ZOPEN_STABLE_DEPS='perl make m4 autoconf automake texinfo ncurses gawk zoslib'
