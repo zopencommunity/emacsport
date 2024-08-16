@@ -1,0 +1,392 @@
+diff --git a/configure.ac b/configure.ac
+index eca5025..62e4b06 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -779,6 +779,9 @@ case "${canonical}" in
+   powerpc-ibm-aix[5-9]* | powerpc-ibm-aix[1-9][0-9]* )
+     opsys=aix4-2
+   ;;
++  i370-ibm-openedition)
++    opsys=zos
++  ;;
+ 
+   ## Solaris
+   *-*-solaris* | *-*-sunos*)
+@@ -5071,7 +5074,7 @@ if test "$ac_cv_func_pthread_setname_np" = "yes"; then
+ fi
+ 
+ dnl No need to check for posix_memalign if aligned_alloc works.
+-AC_CHECK_FUNCS([aligned_alloc posix_memalign], [break])
++AC_CHECK_FUNCS([aligned_alloc], [break])
+ AC_CHECK_DECLS([aligned_alloc], [], [], [[#include <stdlib.h>]])
+ 
+ case $with_unexec,$canonical in
+diff --git a/lib-src/Makefile.in b/lib-src/Makefile.in
+index a0d47b3..1c541df 100644
+--- a/lib-src/Makefile.in
++++ b/lib-src/Makefile.in
+@@ -397,28 +397,28 @@ etags_deps = ${srcdir}/etags.c $(NTLIB) $(config_h)
+ etags_libs = $(NTLIB) $(LOADLIBES) $(LIBS_ETAGS)
+ 
+ etags${EXEEXT}: ${etags_deps}
+-	$(AM_V_CCLD)$(CC) ${ALL_CFLAGS} -o $@ $< $(etags_libs)
++	$(AM_V_CCLD)$(CC) ${ALL_CFLAGS} -o $@ $< $(etags_libs) ${LIBS}
+ 
+ ## ctags.c is distinct from etags.c so that parallel makes do not write two
+ ## etags.o files on top of each other.
+ ## FIXME?
+ ## Can't we use a wrapper that calls 'etags --ctags'?
+ ctags${EXEEXT}: ${srcdir}/ctags.c ${etags_deps}
+-	$(AM_V_CCLD)$(CC) ${ALL_CFLAGS} -o $@ $< $(etags_libs)
++	$(AM_V_CCLD)$(CC) ${ALL_CFLAGS} -o $@ $< $(etags_libs) ${LIBS}
+ 
+ ebrowse${EXEEXT}: ${srcdir}/ebrowse.c ${srcdir}/../lib/min-max.h $(NTLIB) \
+                    $(config_h)
+-	$(AM_V_CCLD)$(CC) ${ALL_CFLAGS} -o $@ $< $(NTLIB) $(LOADLIBES)
++	$(AM_V_CCLD)$(CC) ${ALL_CFLAGS} -o $@ $< $(NTLIB) $(LOADLIBES) ${LIBS}
+ 
+ make-docfile${EXEEXT}: ${srcdir}/make-docfile.c $(NTLIB) $(config_h)
+-	$(AM_V_CCLD)$(CC) ${ALL_CFLAGS} $< $(NTLIB) $(LOADLIBES) -o $@
++	$(AM_V_CCLD)$(CC) ${ALL_CFLAGS} $< $(NTLIB) $(LOADLIBES) -o $@ ${LIBS}
+ 
+ make-fingerprint${EXEEXT}: ${srcdir}/make-fingerprint.c $(NTLIB) $(config_h)
+-	$(AM_V_CCLD)$(CC) ${ALL_CFLAGS} $< $(NTLIB) $(LOADLIBES) -o $@
++	$(AM_V_CCLD)$(CC) ${ALL_CFLAGS} $< $(NTLIB) $(LOADLIBES) -o $@ ${LIBS}
+ 
+ movemail${EXEEXT}: ${srcdir}/movemail.c pop.o $(NTLIB) $(config_h)
+ 	$(AM_V_CCLD)$(CC) ${ALL_CFLAGS} ${MOVE_FLAGS} $< pop.o \
+-	  $(NTLIB) $(LOADLIBES) $(LIBS_MOVE) -o $@
++	  $(NTLIB) $(LOADLIBES) $(LIBS_MOVE) -o $@ ${LIBS}
+ 
+ pop.o: ${srcdir}/pop.c ${srcdir}/pop.h ${srcdir}/../lib/min-max.h $(config_h)
+ 	$(AM_V_CC)$(CC) -c ${CPP_CFLAGS} ${MOVE_FLAGS} $<
+@@ -426,12 +426,12 @@ pop.o: ${srcdir}/pop.c ${srcdir}/pop.h ${srcdir}/../lib/min-max.h $(config_h)
+ emacsclient${EXEEXT}: ${srcdir}/emacsclient.c $(NTLIB) $(config_h)
+ 	$(AM_V_CCLD)$(CC) ${ALL_CFLAGS} $< \
+ 	   $(NTLIB) $(LOADLIBES) \
+-	   $(LIB_WSOCK32) $(LIB_EACCESS) $(LIB_HAS_ACL) $(LIBS_ECLIENT) -o $@
++	   $(LIB_WSOCK32) $(LIB_EACCESS) $(LIB_HAS_ACL) $(LIBS_ECLIENT) ${LIBS} -o $@
+ 
+ emacsclientw${EXEEXT}: ${srcdir}/emacsclient.c $(NTLIB) $(CLIENTRES) $(config_h)
+ 	$(AM_V_CCLD)$(CC) ${ALL_CFLAGS} $(CLIENTRES) -mwindows $< \
+ 	   $(LOADLIBES) \
+-	   $(LIB_WSOCK32) $(LIB_EACCESS) $(LIBS_ECLIENT) -o $@
++	   $(LIB_WSOCK32) $(LIB_EACCESS) $(LIBS_ECLIENT) ${LIBS} -o $@
+ 
+ be-resources: ${srcdir}/be_resources.cc ${config_h}
+ 	$(AM_V_CXXLD)$(CXX) ${ALL_CXXFLAGS} ${HAIKU_LIBS} $< -o $@
+@@ -447,12 +447,12 @@ ntlib.o: ${srcdir}/ntlib.c ${srcdir}/ntlib.h $(NTDEPS)
+ 	$(AM_V_CC)$(CC) -c ${CPP_CFLAGS} $<
+ 
+ hexl${EXEEXT}: ${srcdir}/hexl.c $(NTLIB) $(config_h)
+-	$(AM_V_CCLD)$(CC) ${ALL_CFLAGS} $< $(LOADLIBES) -o $@
++	$(AM_V_CCLD)$(CC) ${ALL_CFLAGS} $< $(LOADLIBES) -o $@ ${LIBS}
+ 
+ update-game-score${EXEEXT}: ${srcdir}/update-game-score.c $(NTLIB) $(config_h)
+ 	$(AM_V_CCLD)$(CC) ${ALL_CFLAGS} \
+ 	  -DHAVE_SHARED_GAME_DIR="\"$(gamedir)\"" \
+-	  $< $(NTLIB) $(LOADLIBES) -o $@
++	  $< $(NTLIB) $(LOADLIBES) -o $@ ${LIBS}
+ 
+ emacsclient.res: ../nt/emacsclient.rc $(NTINC)/../icons/emacs.ico
+ 	$(AM_V_RC)$(WINDRES) -O coff --include-dir=$(NTINC)/.. -o $@ $<
+@@ -460,7 +460,7 @@ emacsclient.res: ../nt/emacsclient.rc $(NTINC)/../icons/emacs.ico
+ ifeq ($(SECCOMP_FILTER),1)
+ seccomp-filter$(EXEEXT): $(srcdir)/seccomp-filter.c $(config_h)
+ 	$(AM_V_CCLD)$(CC) $(ALL_CFLAGS) $(LIBSECCOMP_CFLAGS) $< \
+-	  $(LIBSECCOMP_LIBS) -o $@
++	  $(LIBSECCOMP_LIBS) -o $@ ${LIBS}
+ 
+ seccomp-filter.bpf seccomp-filter.pfc seccomp-filter-exec.bpf seccomp-filter-exec.pfc: seccomp-filter$(EXEEXT)
+ 	$(AM_V_GEN)./seccomp-filter$(EXEEXT) \
+diff --git a/lib-src/make-fingerprint.c b/lib-src/make-fingerprint.c
+index dcd2ccc..c8cbb2c 100644
+--- a/lib-src/make-fingerprint.c
++++ b/lib-src/make-fingerprint.c
+@@ -101,6 +101,7 @@ main (int argc, char **argv)
+       perror (file);
+       return EXIT_FAILURE;
+     }
++  __disableautocvt(fileno(f));
+ 
+   if (!S_ISREG (st.st_mode))
+     {
+diff --git a/src/dynlib.c b/src/dynlib.c
+index 62e6e17..73d48bd 100644
+--- a/src/dynlib.c
++++ b/src/dynlib.c
+@@ -298,6 +298,8 @@ dynlib_addr (void (*funcptr) (void), const char **path, const char **sym)
+ {
+   *path = NULL;
+   *sym = NULL;
++/*FIXME: investigate if we have an altnerative to DL_info */
++#ifndef __MVS__
+ #ifdef HAVE_DLADDR
+   void *ptr = (void *) funcptr;
+   Dl_info info;
+@@ -307,6 +309,7 @@ dynlib_addr (void (*funcptr) (void), const char **path, const char **sym)
+       *sym = info.dli_sname;
+     }
+ #endif
++#endif
+ }
+ 
+ const char *
+diff --git a/src/editfns.c b/src/editfns.c
+index 85f7739..6c0b3ff 100644
+--- a/src/editfns.c
++++ b/src/editfns.c
+@@ -1270,11 +1270,18 @@ is in general a comma-separated list.  */)
+   if (!pw)
+     return Qnil;
+ 
++/*FIXME: Invesigate USER_FULL_NAME */
++#ifndef __MVS__
+   p = USER_FULL_NAME;
++  
+   /* Chop off everything after the first comma, since 'pw_gecos' is a
+      comma-separated list. */
+   q = strchr (p, ',');
+   full = make_string (p, q ? q - p : strlen (p));
++#else
++  p = "N/A";
++  full = "N/A";
++#endif
+ 
+ #ifdef AMPERSAND_FULL_NAME
+   p = SSDATA (full);
+diff --git a/src/emacs-module.c b/src/emacs-module.c
+index 9625c4b..77b648c 100644
+--- a/src/emacs-module.c
++++ b/src/emacs-module.c
+@@ -247,8 +247,11 @@ module_decode_utf_8 (const char *str, ptrdiff_t len)
+    passing information to the handler functions.  */
+ 
+ #if !HAS_ATTRIBUTE (cleanup)
++/*FIXME: investigate */
++#ifndef __MVS__
+  #error "__attribute__ ((cleanup)) not supported by this compiler; try GCC"
+ #endif
++#endif
+ 
+ /* Place this macro at the beginning of a function returning a number
+    or a pointer to handle non-local exits.  The function must have an
+diff --git a/src/process.c b/src/process.c
+index cec0acc..19d9206 100644
+--- a/src/process.c
++++ b/src/process.c
+@@ -30,6 +30,10 @@ along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.  */
+ #include <unistd.h>
+ #include <fcntl.h>
+ 
++#ifdef __MVS__
++#undef HAVE_GETIFADDRS
++#endif 
++
+ #include "lisp.h"
+ 
+ /* Only MS-DOS does not define `subprocesses'.  */
+diff --git a/configure b/configure
+index cd07244..eaa4c30 100755
+--- a/configure
++++ b/configure
+@@ -6149,6 +6149,9 @@ case "${canonical}" in
+   powerpc-ibm-aix[5-9]* | powerpc-ibm-aix[1-9][0-9]* )
+     opsys=aix4-2
+   ;;
++  i370-ibm-openedition)
++    opsys=zos
++  ;;
+ 
+   ## Solaris
+   *-*-solaris* | *-*-sunos*)
+@@ -22570,30 +22573,6 @@ printf "%s\n" "#define HAVE_PTHREAD_SETNAME_NP_3ARG 1" >>confdefs.h
+ fi
+ 
+ 
+-  for ac_func in aligned_alloc posix_memalign
+-do :
+-  as_ac_var=`printf "%s\n" "ac_cv_func_$ac_func" | $as_tr_sh`
+-ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
+-if eval test \"x\$"$as_ac_var"\" = x"yes"
+-then :
+-  cat >>confdefs.h <<_ACEOF
+-#define `printf "%s\n" "HAVE_$ac_func" | $as_tr_cpp` 1
+-_ACEOF
+- break
+-fi
+-
+-done
+-ac_fn_check_decl "$LINENO" "aligned_alloc" "ac_cv_have_decl_aligned_alloc" "#include <stdlib.h>
+-" "$ac_c_undeclared_builtin_options" "CFLAGS"
+-if test "x$ac_cv_have_decl_aligned_alloc" = xyes
+-then :
+-  ac_have_decl=1
+-else $as_nop
+-  ac_have_decl=0
+-fi
+-printf "%s\n" "#define HAVE_DECL_ALIGNED_ALLOC $ac_have_decl" >>confdefs.h
+-
+-
+ case $with_unexec,$canonical in
+   yes,alpha*)
+     ac_fn_check_decl "$LINENO" "__ELF__" "ac_cv_have_decl___ELF__" "$ac_includes_default" "$ac_c_undeclared_builtin_options" "CFLAGS"
+@@ -22619,75 +22598,6 @@ then :
+ fi
+ 
+ 
+-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for __builtin_frame_address" >&5
+-printf %s "checking for __builtin_frame_address... " >&6; }
+-if test ${emacs_cv_func___builtin_frame_address+y}
+-then :
+-  printf %s "(cached) " >&6
+-else $as_nop
+-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+-/* end confdefs.h.  */
+-
+-int
+-main (void)
+-{
+-__builtin_frame_address (0);
+-  ;
+-  return 0;
+-}
+-_ACEOF
+-if ac_fn_c_try_link "$LINENO"
+-then :
+-  emacs_cv_func___builtin_frame_address=yes
+-else $as_nop
+-  emacs_cv_func___builtin_frame_address=no
+-fi
+-rm -f core conftest.err conftest.$ac_objext conftest.beam \
+-    conftest$ac_exeext conftest.$ac_ext
+-fi
+-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $emacs_cv_func___builtin_frame_address" >&5
+-printf "%s\n" "$emacs_cv_func___builtin_frame_address" >&6; }
+-if test $emacs_cv_func___builtin_frame_address = yes; then
+-
+-printf "%s\n" "#define HAVE___BUILTIN_FRAME_ADDRESS 1" >>confdefs.h
+-
+-fi
+-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for __builtin_unwind_init" >&5
+-printf %s "checking for __builtin_unwind_init... " >&6; }
+-if test ${emacs_cv_func___builtin_unwind_init+y}
+-then :
+-  printf %s "(cached) " >&6
+-else $as_nop
+-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+-/* end confdefs.h.  */
+-
+-int
+-main (void)
+-{
+-__builtin_unwind_init ();
+-  ;
+-  return 0;
+-}
+-_ACEOF
+-if ac_fn_c_try_link "$LINENO"
+-then :
+-  emacs_cv_func___builtin_unwind_init=yes
+-else $as_nop
+-  emacs_cv_func___builtin_unwind_init=no
+-fi
+-rm -f core conftest.err conftest.$ac_objext conftest.beam \
+-    conftest$ac_exeext conftest.$ac_ext
+-fi
+-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $emacs_cv_func___builtin_unwind_init" >&5
+-printf "%s\n" "$emacs_cv_func___builtin_unwind_init" >&6; }
+-if test $emacs_cv_func___builtin_unwind_init = yes; then
+-
+-printf "%s\n" "#define HAVE___BUILTIN_UNWIND_INIT 1" >>confdefs.h
+-
+-fi
+-
+-
+-
+ 
+ { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for _LARGEFILE_SOURCE value needed for large files" >&5
+ printf %s "checking for _LARGEFILE_SOURCE value needed for large files... " >&6; }
+@@ -24400,7 +24310,6 @@ esac
+ 
+ 
+ 
+-
+ case $opsys in
+   aix4-2 )
+     printf "%s\n" "#define PTY_ITERATION int c; for (c = 0; !c ; c++)" >>confdefs.h
+@@ -24421,12 +24330,19 @@ case $opsys in
+     printf "%s\n" "#define PTY_TTY_NAME_SPRINTF /**/" >>confdefs.h
+ 
+     ;;
++  zos )
++    printf "%s\n" "#define PTY_ITERATION int i; for (i = 0; i < 1; i++)" >>confdefs.h
++	  printf "%s\n" "#define PTY_OPEN do { fd = posix_openpt (O_RDWR | O_CLOEXEC | O_NOCTTY); if (fd < 0 && errno == EINVAL) fd = posix_openpt (O_RDWR | O_NOCTTY); } while (false)" >>confdefs.h
++	  printf "%s\n" "#define PTY_NAME_SPRINTF /**/" >>confdefs.h
++    printf "%s\n" "#define PTY_TTY_NAME_SPRINTF { char *ptyname = 0;  if (grantpt (fd) != -1 && unlockpt (fd) != -1) ptyname = ptsname(fd);  if (!ptyname) { emacs_close (fd); return -1; } snprintf (pty_name, PTY_NAME_SIZE, \"%s\", ptyname); }" >>confdefs.h
++;;
+ 
+   gnu | qnxnto )
+     printf "%s\n" "#define FIRST_PTY_LETTER 'p'" >>confdefs.h
+ 
+     ;;
+ 
++
+   gnu-linux | gnu-kfreebsd | dragonfly | freebsd | openbsd | netbsd | darwin | nacl )
+         if test "x$ac_cv_func_grantpt" = xyes; then
+ 
+@@ -24928,54 +24844,6 @@ printf "%s\n" "#define HAVE_TINY_SPEED_T 1" >>confdefs.h
+   fi
+ fi
+ 
+-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for usable FIONREAD" >&5
+-printf %s "checking for usable FIONREAD... " >&6; }
+-if test ${emacs_cv_usable_FIONREAD+y}
+-then :
+-  printf %s "(cached) " >&6
+-else $as_nop
+-  case $opsys in
+-     aix4-2 | nacl)
+-              emacs_cv_usable_FIONREAD=no
+-       ;;
+-
+-     mingw32)
+-       emacs_cv_usable_FIONREAD=yes
+-       ;;
+-
+-     *)
+-       cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+-/* end confdefs.h.  */
+-#include <sys/types.h>
+-			    #include <sys/ioctl.h>
+-			    #ifdef USG5_4
+-			    # include <sys/filio.h>
+-			    #endif
+-
+-int
+-main (void)
+-{
+-int foo = ioctl (0, FIONREAD, &foo);
+-  ;
+-  return 0;
+-}
+-_ACEOF
+-if ac_fn_c_try_compile "$LINENO"
+-then :
+-  emacs_cv_usable_FIONREAD=yes
+-else $as_nop
+-  emacs_cv_usable_FIONREAD=no
+-fi
+-rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+-       ;;
+-   esac
+-fi
+-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $emacs_cv_usable_FIONREAD" >&5
+-printf "%s\n" "$emacs_cv_usable_FIONREAD" >&6; }
+-if test $emacs_cv_usable_FIONREAD = yes; then
+-
+-printf "%s\n" "#define USABLE_FIONREAD 1" >>confdefs.h
+-
+ 
+   if test $emacs_broken_SIGIO = no; then
+     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for usable SIGIO" >&5
