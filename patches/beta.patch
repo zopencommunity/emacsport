@@ -187,7 +187,7 @@ index cec0acc..19d9206 100644
  
  /* Only MS-DOS does not define `subprocesses'.  */
 diff --git a/configure b/configure
-index cd07244..eaa4c30 100755
+index cd07244..c970788 100755
 --- a/configure
 +++ b/configure
 @@ -6149,6 +6149,9 @@ case "${canonical}" in
@@ -390,3 +390,11 @@ index cd07244..eaa4c30 100755
  
    if test $emacs_broken_SIGIO = no; then
      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for usable SIGIO" >&5
+@@ -25050,7 +24918,6 @@ printf "%s\n" "#define USABLE_SIGPOLL 1" >>confdefs.h
+ 
+     fi
+   fi
+-fi
+ 
+ case $opsys in
+   hpux11)
