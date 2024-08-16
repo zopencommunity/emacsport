@@ -1,3 +1,2 @@
-log/
-install/
-emacs-emacs-28.3-rc1/
+log-*/
+emacs-*/

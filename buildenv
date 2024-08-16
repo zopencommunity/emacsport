@@ -1,20 +1,37 @@
-#
-# Build emacs using latest tarball
-#
-export ZOPEN_TYPE='TARBALL'
-export ZOPEN_TARBALL_URL='http://git.savannah.gnu.org/cgit/emacs.git/snapshot/emacs-emacs-28.3-rc1.tar.gz'
-export ZOPEN_TARBALL_DEPS='perl make m4 autoconf automake texinfo ncurses gawk zoslib'
+# bump: emacs-version /EMACS_VERSION="(.*)"/ https://ftp.gnu.org/gnu/emacs/|re:/href="emacs-([\d.]+).tar.gz"/$1/|semver:*
+EMACS_VERSION="29.4"
+export ZOPEN_BUILD_LINE='STABLE'
+export ZOPEN_STABLE_URL="https://ftp.gnu.org/gnu/emacs/emacs-${EMACS_VERSION}.tar.gz"
+export ZOPEN_STABLE_DEPS='perl make m4 autoconf automake texinfo ncurses gawk zoslib coreutils sed grep zlib'
 export ZOPEN_EXTRA_CPPFLAGS="-DMAP_ANON=0"
 export ZOPEN_EXTRA_CFLAGS="-DMAP_ANON=0"
-export ZOPEN_RUNTIME_DEPS=""
-export ZOPEN_MAKE_OPTS="all -j\$ZOPEN_NUM_JOBS"
-export ZOPEN_INSTALL_OPTS="install -j\$ZOPEN_NUM_JOBS"
 export ZOPEN_COMP=CLANG
 
-export ZOPEN_BOOTSTRAP="./autogen.sh"
-export ZOPEN_EXTRA_CONFIGURE_OPTS='--with-xpm=no --with-jpeg=no --with-png=no --with-gif=no --with-tiff=no --with-gnutls=no --without-x --without-all --with-dumping=none'
+export ZOPEN_BOOTSTRAP="skip"
+export ZOPEN_EXTRA_CONFIGURE_OPTS='--with-pdumper=yes --with-dumping=none --without-x --without-dbus --without-ns --without-imagemagick --without-selinux --without-gnutls --with-ncurses --with-zlib'
 
 zopen_check_results()
 {
-  return 3
+chk="$1/$2_check.log"
+
+ERROR=$(grep -E '^# ERROR:' ${chk} | tail -1 | awk '{ print $3; }')
+SKIP=$(grep -E '^# SKIP:' ${chk} | tail -1 | awk '{ print $3; }')
+PASS=$(grep -E '^# PASS:' ${chk} | tail -1 | awk '{ print $3; }')
+FAIL=$(grep -E '^# FAIL:' ${chk} | tail -1 | awk '{ print $3; }')
+XFAIL=$(grep -E '^# XFAIL:' ${chk} | tail -1 | awk '{ print $3; }')
+TOTAL=$(grep -E '^# TOTAL:' ${chk} | tail -1 | awk '{ print $3; }')
+
+totalTests=$(echo "${TOTAL}-${SKIP}" | bc )
+actualFailures=$(echo "${FAIL}+${XFAIL}+${ERROR}" | bc)
+
+cat <<ZZ
+actualFailures:1
+totalTests:1
+expectedFailures:0
+ZZ
+}
+
+zopen_get_version()
+{
+  ./src/emacs --version | head -1 | awk '{ print $3 }'
 }
