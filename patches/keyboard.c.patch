@@ -1,0 +1,13 @@
+diff --git a/src/keyboard.c b/src/keyboard.c
+index 4053f53..6dca2f2 100644
+--- a/src/keyboard.c
++++ b/src/keyboard.c
+@@ -7575,7 +7575,7 @@ tty_read_avail_input (struct terminal *terminal,
+     return 0;
+   if (n_to_read > sizeof cbuf)
+     n_to_read = sizeof cbuf;
+-#elif defined USG || defined CYGWIN
++#elif defined USG || defined CYGWIN || defined __MVS__
+   /* Read some input if available, but don't wait.  */
+   n_to_read = sizeof cbuf;
+   fcntl (fileno (tty->input), F_SETFL, O_NONBLOCK);
