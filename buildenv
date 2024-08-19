@@ -26,3 +26,12 @@ zopen_get_version()
 {
   ./src/emacs --version | head -1 | awk '{ print $3 }'
 }
+
+zopen_append_to_zoslib_env() {
+cat <<EOF
+EMACSDATA|set|PROJECT_ROOT/share/emacs/${EMACS_VERSION}/etc/
+EMACSPATH|set|PROJECT_ROOT/bin
+EMACSLOADPATH|set|PROJECT_ROOT/share/emacs/${EMACS_VERSION}/lisp/
+ASCII_TERMINFO|set|PROJECT_ROOT/../../ncurses/ncurses/share/terminfo/
+EOF
+}
