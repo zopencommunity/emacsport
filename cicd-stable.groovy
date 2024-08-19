@@ -15,7 +15,7 @@ node('linux')
     build job: 'Port-Pipeline', parameters: [
       string(name: 'PORT_GITHUB_REPO', value: 'https://github.com/ZOSOpenTools/emacsport.git'), 
       string(name: 'PORT_DESCRIPTION', value: 'emacs editor' ),
-      string(name: 'BUILD_LINE', value: 'STABLE'), string(name: 'NODE_LABEL', value: "v3r1") 
+      string(name: 'BUILD_LINE', value: 'STABLE'), string(name: 'NODE_LABEL', value: "v2r5") 
     ]
   }
 }
