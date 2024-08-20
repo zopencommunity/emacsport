@@ -7,6 +7,7 @@ export ZOPEN_EXTRA_CPPFLAGS="-DMAP_ANON=0"
 export ZOPEN_EXTRA_CFLAGS="-DMAP_ANON=0"
 export ZOPEN_COMP=CLANG
 export ZOPEN_CHECK=skip
+export ZOPEN_RUNTIME_DEPS="ncurses"
 
 export ZOPEN_BOOTSTRAP="skip"
 export ZOPEN_EXTRA_CONFIGURE_OPTS='--with-pdumper=yes --with-dumping=none --without-x --without-dbus --without-ns --without-imagemagick --without-selinux --without-gnutls --with-ncurses --with-zlib  --with-file-notification=no'
