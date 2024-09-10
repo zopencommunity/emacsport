@@ -1,0 +1,630 @@
+diff --git a/configure b/configure
+index cd07244..c970788 100755
+--- a/configure
++++ b/configure
+@@ -6149,6 +6149,9 @@ case "${canonical}" in
+   powerpc-ibm-aix[5-9]* | powerpc-ibm-aix[1-9][0-9]* )
+     opsys=aix4-2
+   ;;
++  i370-ibm-openedition)
++    opsys=zos
++  ;;
+ 
+   ## Solaris
+   *-*-solaris* | *-*-sunos*)
+@@ -22570,30 +22573,6 @@ printf "%s\n" "#define HAVE_PTHREAD_SETNAME_NP_3ARG 1" >>confdefs.h
+ fi
+ 
+ 
+-  for ac_func in aligned_alloc posix_memalign
+-do :
+-  as_ac_var=`printf "%s\n" "ac_cv_func_$ac_func" | $as_tr_sh`
+-ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
+-if eval test \"x\$"$as_ac_var"\" = x"yes"
+-then :
+-  cat >>confdefs.h <<_ACEOF
+-#define `printf "%s\n" "HAVE_$ac_func" | $as_tr_cpp` 1
+-_ACEOF
+- break
+-fi
+-
+-done
+-ac_fn_check_decl "$LINENO" "aligned_alloc" "ac_cv_have_decl_aligned_alloc" "#include <stdlib.h>
+-" "$ac_c_undeclared_builtin_options" "CFLAGS"
+-if test "x$ac_cv_have_decl_aligned_alloc" = xyes
+-then :
+-  ac_have_decl=1
+-else $as_nop
+-  ac_have_decl=0
+-fi
+-printf "%s\n" "#define HAVE_DECL_ALIGNED_ALLOC $ac_have_decl" >>confdefs.h
+-
+-
+ case $with_unexec,$canonical in
+   yes,alpha*)
+     ac_fn_check_decl "$LINENO" "__ELF__" "ac_cv_have_decl___ELF__" "$ac_includes_default" "$ac_c_undeclared_builtin_options" "CFLAGS"
+@@ -22619,75 +22598,6 @@ then :
+ fi
+ 
+ 
+-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for __builtin_frame_address" >&5
+-printf %s "checking for __builtin_frame_address... " >&6; }
+-if test ${emacs_cv_func___builtin_frame_address+y}
+-then :
+-  printf %s "(cached) " >&6
+-else $as_nop
+-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+-/* end confdefs.h.  */
+-
+-int
+-main (void)
+-{
+-__builtin_frame_address (0);
+-  ;
+-  return 0;
+-}
+-_ACEOF
+-if ac_fn_c_try_link "$LINENO"
+-then :
+-  emacs_cv_func___builtin_frame_address=yes
+-else $as_nop
+-  emacs_cv_func___builtin_frame_address=no
+-fi
+-rm -f core conftest.err conftest.$ac_objext conftest.beam \
+-    conftest$ac_exeext conftest.$ac_ext
+-fi
+-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $emacs_cv_func___builtin_frame_address" >&5
+-printf "%s\n" "$emacs_cv_func___builtin_frame_address" >&6; }
+-if test $emacs_cv_func___builtin_frame_address = yes; then
+-
+-printf "%s\n" "#define HAVE___BUILTIN_FRAME_ADDRESS 1" >>confdefs.h
+-
+-fi
+-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for __builtin_unwind_init" >&5
+-printf %s "checking for __builtin_unwind_init... " >&6; }
+-if test ${emacs_cv_func___builtin_unwind_init+y}
+-then :
+-  printf %s "(cached) " >&6
+-else $as_nop
+-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+-/* end confdefs.h.  */
+-
+-int
+-main (void)
+-{
+-__builtin_unwind_init ();
+-  ;
+-  return 0;
+-}
+-_ACEOF
+-if ac_fn_c_try_link "$LINENO"
+-then :
+-  emacs_cv_func___builtin_unwind_init=yes
+-else $as_nop
+-  emacs_cv_func___builtin_unwind_init=no
+-fi
+-rm -f core conftest.err conftest.$ac_objext conftest.beam \
+-    conftest$ac_exeext conftest.$ac_ext
+-fi
+-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $emacs_cv_func___builtin_unwind_init" >&5
+-printf "%s\n" "$emacs_cv_func___builtin_unwind_init" >&6; }
+-if test $emacs_cv_func___builtin_unwind_init = yes; then
+-
+-printf "%s\n" "#define HAVE___BUILTIN_UNWIND_INIT 1" >>confdefs.h
+-
+-fi
+-
+-
+-
+ 
+ { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for _LARGEFILE_SOURCE value needed for large files" >&5
+ printf %s "checking for _LARGEFILE_SOURCE value needed for large files... " >&6; }
+@@ -24400,7 +24310,6 @@ esac
+ 
+ 
+ 
+-
+ case $opsys in
+   aix4-2 )
+     printf "%s\n" "#define PTY_ITERATION int c; for (c = 0; !c ; c++)" >>confdefs.h
+@@ -24421,12 +24330,19 @@ case $opsys in
+     printf "%s\n" "#define PTY_TTY_NAME_SPRINTF /**/" >>confdefs.h
+ 
+     ;;
++  zos )
++    printf "%s\n" "#define PTY_ITERATION int i; for (i = 0; i < 1; i++)" >>confdefs.h
++	  printf "%s\n" "#define PTY_OPEN do { fd = posix_openpt (O_RDWR | O_CLOEXEC | O_NOCTTY); if (fd < 0 && errno == EINVAL) fd = posix_openpt (O_RDWR | O_NOCTTY); } while (false)" >>confdefs.h
++	  printf "%s\n" "#define PTY_NAME_SPRINTF /**/" >>confdefs.h
++    printf "%s\n" "#define PTY_TTY_NAME_SPRINTF { char *ptyname = 0;  if (grantpt (fd) != -1 && unlockpt (fd) != -1) ptyname = ptsname(fd);  if (!ptyname) { emacs_close (fd); return -1; } snprintf (pty_name, PTY_NAME_SIZE, \"%s\", ptyname); }" >>confdefs.h
++;;
+ 
+   gnu | qnxnto )
+     printf "%s\n" "#define FIRST_PTY_LETTER 'p'" >>confdefs.h
+ 
+     ;;
+ 
++
+   gnu-linux | gnu-kfreebsd | dragonfly | freebsd | openbsd | netbsd | darwin | nacl )
+         if test "x$ac_cv_func_grantpt" = xyes; then
+ 
+@@ -24928,54 +24844,6 @@ printf "%s\n" "#define HAVE_TINY_SPEED_T 1" >>confdefs.h
+   fi
+ fi
+ 
+-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for usable FIONREAD" >&5
+-printf %s "checking for usable FIONREAD... " >&6; }
+-if test ${emacs_cv_usable_FIONREAD+y}
+-then :
+-  printf %s "(cached) " >&6
+-else $as_nop
+-  case $opsys in
+-     aix4-2 | nacl)
+-              emacs_cv_usable_FIONREAD=no
+-       ;;
+-
+-     mingw32)
+-       emacs_cv_usable_FIONREAD=yes
+-       ;;
+-
+-     *)
+-       cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+-/* end confdefs.h.  */
+-#include <sys/types.h>
+-			    #include <sys/ioctl.h>
+-			    #ifdef USG5_4
+-			    # include <sys/filio.h>
+-			    #endif
+-
+-int
+-main (void)
+-{
+-int foo = ioctl (0, FIONREAD, &foo);
+-  ;
+-  return 0;
+-}
+-_ACEOF
+-if ac_fn_c_try_compile "$LINENO"
+-then :
+-  emacs_cv_usable_FIONREAD=yes
+-else $as_nop
+-  emacs_cv_usable_FIONREAD=no
+-fi
+-rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+-       ;;
+-   esac
+-fi
+-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $emacs_cv_usable_FIONREAD" >&5
+-printf "%s\n" "$emacs_cv_usable_FIONREAD" >&6; }
+-if test $emacs_cv_usable_FIONREAD = yes; then
+-
+-printf "%s\n" "#define USABLE_FIONREAD 1" >>confdefs.h
+-
+ 
+   if test $emacs_broken_SIGIO = no; then
+     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for usable SIGIO" >&5
+@@ -25050,7 +24918,6 @@ printf "%s\n" "#define USABLE_SIGPOLL 1" >>confdefs.h
+ 
+     fi
+   fi
+-fi
+ 
+ case $opsys in
+   hpux11)
+diff --git a/configure.ac b/configure.ac
+index eca5025..62e4b06 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -779,6 +779,9 @@ case "${canonical}" in
+   powerpc-ibm-aix[5-9]* | powerpc-ibm-aix[1-9][0-9]* )
+     opsys=aix4-2
+   ;;
++  i370-ibm-openedition)
++    opsys=zos
++  ;;
+ 
+   ## Solaris
+   *-*-solaris* | *-*-sunos*)
+@@ -5071,7 +5074,7 @@ if test "$ac_cv_func_pthread_setname_np" = "yes"; then
+ fi
+ 
+ dnl No need to check for posix_memalign if aligned_alloc works.
+-AC_CHECK_FUNCS([aligned_alloc posix_memalign], [break])
++AC_CHECK_FUNCS([aligned_alloc], [break])
+ AC_CHECK_DECLS([aligned_alloc], [], [], [[#include <stdlib.h>]])
+ 
+ case $with_unexec,$canonical in
+diff --git a/info/emacs.info b/info/emacs.info
+index b79e3a1..5270dbb 100644
+--- a/info/emacs.info
++++ b/info/emacs.info
+@@ -48937,9 +48937,9 @@ files, summarized in the file âetc/AUTHORSâ in the distribution.
+    â¢ Theresa OâConnor wrote âjson.elâ, a file for parsing and generating
+      JSON files.
+ 
+-   â¢ Andrea Corallo wrote the native compilation support in âcomp.câ and
+-     âcomp.elâ, for compiling Emacs Lisp to native code using
+-     âlibgccjitâ.
++   â¢ Andrea Corallo was the Emacs (co-)maintainer from 29.3 onwards.  He
++     wrote the native compilation support in âcomp.câ and and âcomp.elâ,
++     for compiling Emacs Lisp to native code using âlibgccjitâ.
+ 
+    â¢ Georges Brun-Cottan and Stefan Monnier wrote âeasy-mmode.elâ, a
+      package for easy definition of major and minor modes.
+@@ -57820,11 +57820,11 @@ Ref: Glossary---Tooltips2320754
+ Ref: Glossary---Truncation2321904
+ Ref: Glossary---Yanking2324732
+ Node: Acknowledgments2324948
+-Node: Key Index2381946
+-Node: Option Index2470669
+-Node: Command Index2477553
+-Node: Variable Index2625009
+-Node: Concept Index2721758
++Node: Key Index2382003
++Node: Option Index2470726
++Node: Command Index2477610
++Node: Variable Index2625066
++Node: Concept Index2721815
+ 
+ End Tag Table
+ 
+diff --git a/lib-src/Makefile.in b/lib-src/Makefile.in
+index a0d47b3..1c541df 100644
+--- a/lib-src/Makefile.in
++++ b/lib-src/Makefile.in
+@@ -397,28 +397,28 @@ etags_deps = ${srcdir}/etags.c $(NTLIB) $(config_h)
+ etags_libs = $(NTLIB) $(LOADLIBES) $(LIBS_ETAGS)
+ 
+ etags${EXEEXT}: ${etags_deps}
+-	$(AM_V_CCLD)$(CC) ${ALL_CFLAGS} -o $@ $< $(etags_libs)
++	$(AM_V_CCLD)$(CC) ${ALL_CFLAGS} -o $@ $< $(etags_libs) ${LIBS}
+ 
+ ## ctags.c is distinct from etags.c so that parallel makes do not write two
+ ## etags.o files on top of each other.
+ ## FIXME?
+ ## Can't we use a wrapper that calls 'etags --ctags'?
+ ctags${EXEEXT}: ${srcdir}/ctags.c ${etags_deps}
+-	$(AM_V_CCLD)$(CC) ${ALL_CFLAGS} -o $@ $< $(etags_libs)
++	$(AM_V_CCLD)$(CC) ${ALL_CFLAGS} -o $@ $< $(etags_libs) ${LIBS}
+ 
+ ebrowse${EXEEXT}: ${srcdir}/ebrowse.c ${srcdir}/../lib/min-max.h $(NTLIB) \
+                    $(config_h)
+-	$(AM_V_CCLD)$(CC) ${ALL_CFLAGS} -o $@ $< $(NTLIB) $(LOADLIBES)
++	$(AM_V_CCLD)$(CC) ${ALL_CFLAGS} -o $@ $< $(NTLIB) $(LOADLIBES) ${LIBS}
+ 
+ make-docfile${EXEEXT}: ${srcdir}/make-docfile.c $(NTLIB) $(config_h)
+-	$(AM_V_CCLD)$(CC) ${ALL_CFLAGS} $< $(NTLIB) $(LOADLIBES) -o $@
++	$(AM_V_CCLD)$(CC) ${ALL_CFLAGS} $< $(NTLIB) $(LOADLIBES) -o $@ ${LIBS}
+ 
+ make-fingerprint${EXEEXT}: ${srcdir}/make-fingerprint.c $(NTLIB) $(config_h)
+-	$(AM_V_CCLD)$(CC) ${ALL_CFLAGS} $< $(NTLIB) $(LOADLIBES) -o $@
++	$(AM_V_CCLD)$(CC) ${ALL_CFLAGS} $< $(NTLIB) $(LOADLIBES) -o $@ ${LIBS}
+ 
+ movemail${EXEEXT}: ${srcdir}/movemail.c pop.o $(NTLIB) $(config_h)
+ 	$(AM_V_CCLD)$(CC) ${ALL_CFLAGS} ${MOVE_FLAGS} $< pop.o \
+-	  $(NTLIB) $(LOADLIBES) $(LIBS_MOVE) -o $@
++	  $(NTLIB) $(LOADLIBES) $(LIBS_MOVE) -o $@ ${LIBS}
+ 
+ pop.o: ${srcdir}/pop.c ${srcdir}/pop.h ${srcdir}/../lib/min-max.h $(config_h)
+ 	$(AM_V_CC)$(CC) -c ${CPP_CFLAGS} ${MOVE_FLAGS} $<
+@@ -426,12 +426,12 @@ pop.o: ${srcdir}/pop.c ${srcdir}/pop.h ${srcdir}/../lib/min-max.h $(config_h)
+ emacsclient${EXEEXT}: ${srcdir}/emacsclient.c $(NTLIB) $(config_h)
+ 	$(AM_V_CCLD)$(CC) ${ALL_CFLAGS} $< \
+ 	   $(NTLIB) $(LOADLIBES) \
+-	   $(LIB_WSOCK32) $(LIB_EACCESS) $(LIB_HAS_ACL) $(LIBS_ECLIENT) -o $@
++	   $(LIB_WSOCK32) $(LIB_EACCESS) $(LIB_HAS_ACL) $(LIBS_ECLIENT) ${LIBS} -o $@
+ 
+ emacsclientw${EXEEXT}: ${srcdir}/emacsclient.c $(NTLIB) $(CLIENTRES) $(config_h)
+ 	$(AM_V_CCLD)$(CC) ${ALL_CFLAGS} $(CLIENTRES) -mwindows $< \
+ 	   $(LOADLIBES) \
+-	   $(LIB_WSOCK32) $(LIB_EACCESS) $(LIBS_ECLIENT) -o $@
++	   $(LIB_WSOCK32) $(LIB_EACCESS) $(LIBS_ECLIENT) ${LIBS} -o $@
+ 
+ be-resources: ${srcdir}/be_resources.cc ${config_h}
+ 	$(AM_V_CXXLD)$(CXX) ${ALL_CXXFLAGS} ${HAIKU_LIBS} $< -o $@
+@@ -447,12 +447,12 @@ ntlib.o: ${srcdir}/ntlib.c ${srcdir}/ntlib.h $(NTDEPS)
+ 	$(AM_V_CC)$(CC) -c ${CPP_CFLAGS} $<
+ 
+ hexl${EXEEXT}: ${srcdir}/hexl.c $(NTLIB) $(config_h)
+-	$(AM_V_CCLD)$(CC) ${ALL_CFLAGS} $< $(LOADLIBES) -o $@
++	$(AM_V_CCLD)$(CC) ${ALL_CFLAGS} $< $(LOADLIBES) -o $@ ${LIBS}
+ 
+ update-game-score${EXEEXT}: ${srcdir}/update-game-score.c $(NTLIB) $(config_h)
+ 	$(AM_V_CCLD)$(CC) ${ALL_CFLAGS} \
+ 	  -DHAVE_SHARED_GAME_DIR="\"$(gamedir)\"" \
+-	  $< $(NTLIB) $(LOADLIBES) -o $@
++	  $< $(NTLIB) $(LOADLIBES) -o $@ ${LIBS}
+ 
+ emacsclient.res: ../nt/emacsclient.rc $(NTINC)/../icons/emacs.ico
+ 	$(AM_V_RC)$(WINDRES) -O coff --include-dir=$(NTINC)/.. -o $@ $<
+@@ -460,7 +460,7 @@ emacsclient.res: ../nt/emacsclient.rc $(NTINC)/../icons/emacs.ico
+ ifeq ($(SECCOMP_FILTER),1)
+ seccomp-filter$(EXEEXT): $(srcdir)/seccomp-filter.c $(config_h)
+ 	$(AM_V_CCLD)$(CC) $(ALL_CFLAGS) $(LIBSECCOMP_CFLAGS) $< \
+-	  $(LIBSECCOMP_LIBS) -o $@
++	  $(LIBSECCOMP_LIBS) -o $@ ${LIBS}
+ 
+ seccomp-filter.bpf seccomp-filter.pfc seccomp-filter-exec.bpf seccomp-filter-exec.pfc: seccomp-filter$(EXEEXT)
+ 	$(AM_V_GEN)./seccomp-filter$(EXEEXT) \
+diff --git a/lib-src/make-fingerprint.c b/lib-src/make-fingerprint.c
+index dcd2ccc..c8cbb2c 100644
+--- a/lib-src/make-fingerprint.c
++++ b/lib-src/make-fingerprint.c
+@@ -101,6 +101,7 @@ main (int argc, char **argv)
+       perror (file);
+       return EXIT_FAILURE;
+     }
++  __disableautocvt(fileno(f));
+ 
+   if (!S_ISREG (st.st_mode))
+     {
+diff --git a/src/buffer.c b/src/buffer.c
+index 32a0501..aaf5003 100644
+--- a/src/buffer.c
++++ b/src/buffer.c
+@@ -1058,6 +1058,10 @@ reset_buffer (register struct buffer *b)
+   b->auto_save_failure_time = 0;
+   bset_auto_save_file_name (b, Qnil);
+   bset_read_only (b, Qnil);
++#ifdef __MVS__
++  bset_dataset (b, Qnil);
++  bset_dsname (b, Qnil);
++#endif
+   b->overlays = NULL;
+   bset_mark_active (b, Qnil);
+   bset_point_before_scroll (b, Qnil);
+@@ -4637,6 +4641,10 @@ init_buffer_once (void)
+   bset_save_length (&buffer_local_flags, make_fixnum (-1));
+   bset_auto_save_file_name (&buffer_local_flags, make_fixnum (-1));
+   bset_read_only (&buffer_local_flags, make_fixnum (-1));
++#ifdef __MVS__
++  bset_dataset (&buffer_local_flags, make_fixnum (-1));
++  bset_dsname (&buffer_local_flags, make_fixnum (-1));
++#endif
+   bset_major_mode (&buffer_local_flags, make_fixnum (-1));
+   bset_local_minor_modes (&buffer_local_flags, make_fixnum (-1));
+   bset_mode_name (&buffer_local_flags, make_fixnum (-1));
+diff --git a/src/buffer.h b/src/buffer.h
+index 9604f4a..cb29b8d 100644
+--- a/src/buffer.h
++++ b/src/buffer.h
+@@ -335,6 +335,12 @@ struct buffer
+   /* Non-nil if buffer read-only.  */
+   Lisp_Object read_only_;
+ 
++#ifdef __MVS__
++  /* Non-nil if buffer is dataset.  */
++  Lisp_Object dataset_;
++  Lisp_Object dsname_;
++#endif
++
+   /* "The mark".  This is a marker which may
+      point into this buffer or may point nowhere.  */
+   Lisp_Object mark_;
+@@ -821,6 +827,18 @@ bset_read_only (struct buffer *b, Lisp_Object val)
+ {
+   b->read_only_ = val;
+ }
++#ifdef __MVS__
++INLINE void
++bset_dataset (struct buffer *b, Lisp_Object val)
++{
++  b->dataset_ = val;
++}
++INLINE void
++bset_dsname (struct buffer *b, Lisp_Object val)
++{
++  b->dsname_ = val;
++}
++#endif
+ INLINE void
+ bset_truncate_lines (struct buffer *b, Lisp_Object val)
+ {
+diff --git a/src/dynlib.c b/src/dynlib.c
+index 62e6e17..73d48bd 100644
+--- a/src/dynlib.c
++++ b/src/dynlib.c
+@@ -298,6 +298,8 @@ dynlib_addr (void (*funcptr) (void), const char **path, const char **sym)
+ {
+   *path = NULL;
+   *sym = NULL;
++/*FIXME: investigate if we have an altnerative to DL_info */
++#ifndef __MVS__
+ #ifdef HAVE_DLADDR
+   void *ptr = (void *) funcptr;
+   Dl_info info;
+@@ -307,6 +309,7 @@ dynlib_addr (void (*funcptr) (void), const char **path, const char **sym)
+       *sym = info.dli_sname;
+     }
+ #endif
++#endif
+ }
+ 
+ const char *
+diff --git a/src/editfns.c b/src/editfns.c
+index 85f7739..6c0b3ff 100644
+--- a/src/editfns.c
++++ b/src/editfns.c
+@@ -1270,11 +1270,18 @@ is in general a comma-separated list.  */)
+   if (!pw)
+     return Qnil;
+ 
++/*FIXME: Invesigate USER_FULL_NAME */
++#ifndef __MVS__
+   p = USER_FULL_NAME;
++  
+   /* Chop off everything after the first comma, since 'pw_gecos' is a
+      comma-separated list. */
+   q = strchr (p, ',');
+   full = make_string (p, q ? q - p : strlen (p));
++#else
++  p = "N/A";
++  full = "N/A";
++#endif
+ 
+ #ifdef AMPERSAND_FULL_NAME
+   p = SSDATA (full);
+diff --git a/src/emacs-module.c b/src/emacs-module.c
+index 9625c4b..77b648c 100644
+--- a/src/emacs-module.c
++++ b/src/emacs-module.c
+@@ -247,8 +247,11 @@ module_decode_utf_8 (const char *str, ptrdiff_t len)
+    passing information to the handler functions.  */
+ 
+ #if !HAS_ATTRIBUTE (cleanup)
++/*FIXME: investigate */
++#ifndef __MVS__
+  #error "__attribute__ ((cleanup)) not supported by this compiler; try GCC"
+ #endif
++#endif
+ 
+ /* Place this macro at the beginning of a function returning a number
+    or a pointer to handle non-local exits.  The function must have an
+diff --git a/src/fileio.c b/src/fileio.c
+index a5d29d8..ab7ea4f 100644
+--- a/src/fileio.c
++++ b/src/fileio.c
+@@ -107,6 +107,10 @@ along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.  */
+ #include <netio.h>
+ #endif
+ 
++#ifdef __MVS__
++#include <dio.h>
++#endif
++
+ #include "commands.h"
+ 
+ /* True during writing of auto-save files.  */
+@@ -1162,6 +1166,7 @@ the root directory.  */)
+     default_directory = Fdowncase (default_directory);
+ #endif
+ 
++
+   /* Make a local copy of NAME to protect it from GC in DECODE_FILE below.  */
+   SAFE_ALLOCA_STRING (nm, name);
+   nmlim = nm + SBYTES (name);
+@@ -3984,6 +3989,54 @@ by calling `format-decode', which see.  */)
+   orig_filename = filename;
+   filename = ENCODE_FILE (filename);
+ 
++#ifdef __MVS__
++      char* dsname = SSDATA(filename);
++      if (is_dataset(dsname)) {
++        bset_dsname (current_buffer, filename);
++		    bset_dataset (current_buffer, Qt);
++        struct DFILE* dsfile = open_dataset(dsname, NULL);
++        if (!dsfile) {
++	        error ("Could not open dataset");
++          return NULL;
++        }
++
++        if (dsfile->err) {
++          close_dataset(dsfile);
++	        error (dsfile->msgbuff);
++          return NULL;
++        }
++
++        if (read_dataset(dsfile) > 0) {
++          close_dataset(dsfile);
++	        error (dsfile->msgbuff);
++          return NULL;
++        }
++
++        // Create a temporary file to represent the dataset 
++        char file_suffix[PATH_MAX];
++        map_to_unixfile(dsfile, file_suffix);
++
++        Lisp_Object filename2 = Qnil;
++	      filename2 = Fmake_temp_file_internal (build_string ("/tmp/ds-"), Qnil,
++						   build_string (file_suffix), Qnil);
++        dsname = SSDATA(filename2);
++
++        if (write_dataset_to_temp_file(dsfile, dsname, dsfile->txtflag == 0 || dsfile->is_binary) != 0) {
++	        error (dsfile->msgbuff);
++          close_dataset(dsfile);
++          return NULL;
++        }
++
++        if (close_dataset(dsfile) > 0) {
++	        error (dsfile->msgbuff);
++          return NULL;
++        }
++
++	      filename = make_unibyte_string (dsname, strlen(dsname));
++        orig_filename = filename;
++      } 
++#endif
++
+   fd = emacs_open (SSDATA (filename), O_RDONLY, 0);
+   if (fd < 0)
+     {
+@@ -5234,6 +5287,7 @@ write_region (Lisp_Object start, Lisp_Object end, Lisp_Object filename,
+ 
+   filename = Fexpand_file_name (filename, Qnil);
+ 
++
+   if (!NILP (mustbenew) && !EQ (mustbenew, Qexcl))
+     barf_or_query_if_file_exists (filename, false, "overwrite", true, true);
+ 
+@@ -5508,6 +5562,34 @@ write_region (Lisp_Object start, Lisp_Object end, Lisp_Object filename,
+       current_buffer->modtime = modtime;
+       current_buffer->modtime_size = st.st_size;
+     }
++#ifdef __MVS__
++  if (EQ (BVAR (current_buffer, dataset), Qt)) {
++    Lisp_Object dsname = (BVAR (current_buffer, dsname));
++    struct DFILE *dsfile = open_dataset(SSDATA (dsname), NULL);
++    if (!dsfile) {
++	    report_file_errno ("Cannot open dataset", dsname, errno);
++    }
++
++    if (dsfile->err) {
++	    report_file_errno (dsfile->msgbuff, dsname, errno);
++      close_dataset(dsfile);
++    }
++
++    if (read_temp_file_to_buffer(SSDATA(filename), dsfile) == NULL) {
++	    report_file_errno (dsfile->msgbuff, dsname, errno);
++      close_dataset(dsfile);
++    } 
++
++    if (write_dataset(dsfile)) {
++	    report_file_errno (dsfile->msgbuff, dsname, errno);
++      close_dataset(dsfile);
++    }
++    if (close_dataset(dsfile)) {
++	    report_file_errno (dsfile->msgbuff, dsname, errno);
++    }
++  }
++#endif
++
+ 
+   if (! ok)
+     report_file_errno ("Write error", filename, save_errno);
+diff --git a/src/keyboard.c b/src/keyboard.c
+index 4053f53..6dca2f2 100644
+--- a/src/keyboard.c
++++ b/src/keyboard.c
+@@ -7575,7 +7575,7 @@ tty_read_avail_input (struct terminal *terminal,
+     return 0;
+   if (n_to_read > sizeof cbuf)
+     n_to_read = sizeof cbuf;
+-#elif defined USG || defined CYGWIN
++#elif defined USG || defined CYGWIN || defined __MVS__
+   /* Read some input if available, but don't wait.  */
+   n_to_read = sizeof cbuf;
+   fcntl (fileno (tty->input), F_SETFL, O_NONBLOCK);
+diff --git a/src/process.c b/src/process.c
+index cec0acc..c034cdd 100644
+--- a/src/process.c
++++ b/src/process.c
+@@ -30,6 +30,10 @@ along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.  */
+ #include <unistd.h>
+ #include <fcntl.h>
+ 
++#ifdef __MVS__
++#undef HAVE_GETIFADDRS
++#endif 
++
+ #include "lisp.h"
+ 
+ /* Only MS-DOS does not define `subprocesses'.  */
