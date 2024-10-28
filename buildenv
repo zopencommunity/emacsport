@@ -2,6 +2,7 @@
 EMACS_VERSION="29.4"
 export ZOPEN_BUILD_LINE='STABLE'
 export ZOPEN_STABLE_URL="https://ftp.gnu.org/gnu/emacs/emacs-${EMACS_VERSION}.tar.gz"
+export ZOPEN_CATEGORIES="editor"
 export ZOPEN_STABLE_DEPS='perl make m4 autoconf automake texinfo ncurses gawk zoslib coreutils sed grep zlib'
 export ZOPEN_EXTRA_CPPFLAGS="-DMAP_ANON=0"
 export ZOPEN_EXTRA_CFLAGS="-DMAP_ANON=0"
